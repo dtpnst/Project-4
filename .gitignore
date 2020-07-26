@@ -4,4 +4,5 @@
 *.DS_Store
 *.vscode/*
 migrations/*
-*db.sqlite3
+*/network/migrations/*
+*/db.sqlite3
