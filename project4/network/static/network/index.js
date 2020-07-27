@@ -109,7 +109,16 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('#save-button-' + post_id).style.display='block';
   }
 
-  function save_post(post_id) {
+  function save_post(post_id, post_type, pageNumber, username) {
+    if(post_type === 'null') {
+        post_type = null;
+    }
+    if(pageNumber === 'null') {
+        pageNumber = 1;
+    }
+    if(username === 'null') {
+        username = null;
+    }
     token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
     fetch('/posts/' + post_id, {
         method: 'PUT',
@@ -125,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(function (data) {
           console.log('Request succeeded with JSON response', data);
-          show_posts("all", null, 1);
+          show_posts(post_type, username, pageNumber);
         })
         .catch(function (error) {
           console.log('Request failed', error);
@@ -139,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
     allPostHtml = '<div class="row">';
     document.querySelector('#profile-info').style.display='none';
     if(post_type === "following") {
-        document.querySelector('#page-title').textContent = 'Posts by users you folowed';
+        document.querySelector('#page-title').textContent = 'Posts by users you followed';
         requestUrl = 'posts?onlyFollowing=True';
         
         if(pageNumber) {
@@ -175,11 +184,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if(data.data.length === 0) {
             allPostHtml += `<p><i data-feather="frown" width="100" height="100"></i></p>
                             <p class="card-text">No Posts Found</p>
+                            <div class="col-1"></div>
                             `;
         }
         
         data.data.forEach(post => {
-            allPostHtml += `<div class="card col-3">
+            allPostHtml += `<div class="card col-6 col-sm-2">
                                 <div class="card-body">
                                     <h5 class="card-title" onclick="show_profile('${post.author}')">${post.author}</h5>                                                               
                                     <p class="card-text" id="content-${post.id}">${post.content}</p>
@@ -191,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             if(currentUser === post.author) {
                 allPostHtml += `<p class="edit-button" id="edit-button-${post.id}"><a href="#" onclick="edit_post(${post.id});" class="btn btn-secondary"><i data-feather="edit" color="white"></i> &nbspEdit</a></p>
-                <p class="edit-button" id="save-button-${post.id}" style="display:none"><a href="#" onclick="save_post(${post.id});" class="btn btn-primary"><i data-feather="save" color="white"></i> &nbspSave</a></p>
+                <p class="edit-button" id="save-button-${post.id}" style="display:none"><a href="#" onclick="save_post(${post.id}, '${post_type}', ${pageNumber}, '${username}');" class="btn btn-primary"><i data-feather="save" color="white"></i> &nbspSave</a></p>
                                 </div>
                             </div>
                 `;
@@ -211,11 +221,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
                                     
         })
-        allPostHtml += '</div>';
+        allPostHtml += '<div class="col-1"></div></div>';
 
         pageCount = data.num_pages;
         allPostHtml += `<nav id="pagination-nav">
                             <ul class="pagination justify-content-center">`;
+        var previous = pageNumber - 1;
+        var next = pageNumber + 1;
+
+        if (previous <= 0) {
+            previous = 1;
+        }
+
+        if (next > pageCount) {
+            next = pageCount;
+        }
+
+        allPostHtml += `<li class="page-item"><a class="page-link" href="#" onclick="show_posts('${post_type}', '${username}', ${previous})">Previous</a></li>`
         var i;
         for(i=1; i <= pageCount; i++) {
             if(i == pageNumber) {
@@ -225,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             
         }
-
+        allPostHtml += `<li class="page-item"><a class="page-link" href="#" onclick="show_posts('${post_type}', '${username}', ${next})">Next</a></li>`;
         allPostHtml +=      `</ul>
                         </nav>`;
         

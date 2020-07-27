@@ -10,11 +10,9 @@
 .card {
     width: 25%; 
     padding: 1em;
+    margin: 1em;
 }
 
-#page-title {
-    padding-left: 3em;
-}
 
 #new-button {
     padding-left: 1em;
