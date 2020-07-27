@@ -5,6 +5,9 @@
     <head>
         <title>{% block title %}Social Network{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
         <link href="{% static 'network/styles.css' %}" rel="stylesheet">
          <script src="https://unpkg.com/feather-icons"></script>
         <script src="{% static 'network/index.js' %}"></script>
@@ -23,11 +26,11 @@
                     </li>
                 {% endif %}
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'index' %}">All Posts</a>
+                  <a class="nav-link" href="#" onclick="show_posts('all', null, 1);">All Posts</a>
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Following</a>
+                        <a class="nav-link" href="#" onclick="show_posts('following', null, 1);">Following</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
@@ -42,11 +45,19 @@
                 {% endif %}
               </ul>
             </div>
+            {% if user.is_authenticated %}
+            <div id="new-button" >
+                <button type="button" class="btn-sm btn-primary" data-toggle="modal" data-target="#new-post">
+                <i data-feather="plus-circle" color="white"></i>&nbsp&nbspNew Post
+                </button>
+            </div>
+            {% endif %}
           </nav>
         
         <div class="body">
             {% block body %}
-            {% endblock %}
+            {% endblock %}            
+
         </div>
     </body>
 </html>

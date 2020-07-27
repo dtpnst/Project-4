@@ -7,6 +7,14 @@ class User(AbstractUser):
     followers = models.ManyToManyField('self', symmetrical=False, related_name="userFollowers")
     following = models.ManyToManyField('self', symmetrical=False, related_name="userFollowing")
 
+    def serialize(self):
+        return {
+            "numFollowing": self.following.count(),
+            "numFollowers": self.followers.count(),
+            "following": serialize("json", self.following.all(), fields=["username"]),
+            "followers": serialize("json", self.followers.all(), fields=["username"])
+        }
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="poster")
     content = models.CharField(max_length=255)

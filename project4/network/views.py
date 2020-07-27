@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -67,12 +68,9 @@ def profile(request, username):
     if request.method != "GET":
         return JsonResponse({"error": "GET request required."}, status=400) 
     
-    user = Users.objects.get(username=username)
+    user = User.objects.get(username=username)
 
-    numFollowers = user.followers.count()
-    numFollowing = user.following.count()
-
-    return JsonResponse({'numFollowers': numFollowers, 'numFollowing': numFollowing})
+    return JsonResponse(user.serialize(), safe=False)
 
 def follow(request, username):
     if request.method != "PUT":
@@ -113,7 +111,7 @@ def unfollow(request, username):
     userToUnfollow.followers.remove(user)
     userToUnfollow.save()
 
-    user.following.remove(userToFollow)
+    user.following.remove(userToUnfollow)
     user.save()
 
     return JsonResponse({"message": "Users updated successfully."}, status=201)
@@ -134,25 +132,28 @@ def posts(request):
         return JsonResponse({"message": "Post created successfully."}, status=201)
     
     if request.method == "GET":
-        onlyFollowing = request.GET.get('following')
+        onlyFollowing = request.GET.get('onlyFollowing')
         onlyUser = request.GET.get('username')
         page_number = request.GET.get('page')
 
         postList = Post.objects.all()
 
-        if onlyFollowing:
-            following = request.user.following
+        if onlyFollowing is not None and onlyFollowing == 'True':
+            following = request.user.following.all()
             postList = Post.objects.filter(user__in=following)
         
-        if onlyUser:
+        if onlyUser is not None:
             requestedUser = User.objects.get(username=onlyUser)
             postList = Post.objects.filter(user=requestedUser)
 
         postList = postList.order_by("-timestamp").all()
+
+        
         paginator = Paginator(postList, 10)
         postsToReturn = paginator.get_page(page_number)
 
-        return JsonResponse([post.serialize() for post in postsToReturn], safe=False)
+        return JsonResponse({"data": [post.serialize() for post in postsToReturn],
+                             "num_pages": paginator.num_pages}, safe=False)
 
     else:
         return JsonResponse({"error": "POST or GET request required."}, status=400) 

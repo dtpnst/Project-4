@@ -6,3 +6,20 @@
 .timestamp {
     color: grey;
 }
+
+.card {
+    width: 25%; 
+    padding: 1em;
+}
+
+#page-title {
+    padding-left: 3em;
+}
+
+#new-button {
+    padding-left: 1em;
+}
+
+#pagination-nav {
+    padding-top: 1em;
+}
