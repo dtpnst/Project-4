@@ -15,6 +15,7 @@
     <body>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
             <a class="navbar-brand" href="#">Network</a>
 
             <div>
@@ -45,19 +46,21 @@
                 {% endif %}
               </ul>
             </div>
+
             {% if user.is_authenticated %}
-            <div id="new-button" >
-                <button type="button" class="btn-sm btn-primary" data-toggle="modal" data-target="#new-post">
-                <i data-feather="plus-circle" color="white"></i>&nbsp&nbspNew Post
-                </button>
-            </div>
+                <div id="new-button" >
+                    <button type="button" class="btn-sm btn-primary" data-toggle="modal" data-target="#new-post">
+                        <i data-feather="plus-circle" color="white"></i>&nbsp&nbspNew Post
+                    </button>
+                </div>
             {% endif %}
-          </nav>
-        
+
+        </nav>
+
         <div class="body">
             {% block body %}
-            {% endblock %}            
-
+            {% endblock %}
         </div>
+
     </body>
 </html>
