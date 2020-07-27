@@ -64,27 +64,32 @@ def register(request):
     else:
         return render(request, "network/register.html")
 
+
 def profile(request, username):
     if request.method != "GET":
-        return JsonResponse({"error": "GET request required."}, status=400) 
-    
+        return JsonResponse({
+            "error": "GET request required."},
+            status=400)
     user = User.objects.get(username=username)
 
     return JsonResponse(user.serialize(), safe=False)
 
+
 def follow(request, username):
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."}, status=400) 
-    
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
     try:
         userToFollow = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found."}, status=404)
 
     user = request.user
-    
+
     if user in userToFollow.followers.all():
-        return JsonResponse({"error": "Current user is already following this user"}, status=400) 
+        return JsonResponse({
+            "error": "Current user is already following this user"},
+            status=400)
 
     userToFollow.followers.add(user)
     userToFollow.save()
@@ -94,19 +99,22 @@ def follow(request, username):
 
     return JsonResponse({"message": "Users updated successfully."}, status=201)
 
+
 def unfollow(request, username):
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."}, status=400) 
-    
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
     try:
         userToUnfollow = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found."}, status=404)
 
     user = request.user
-    
+
     if user not in userToUnfollow.followers.all():
-        return JsonResponse({"error": "Current user is not following this user"}, status=400) 
+        return JsonResponse({
+            "error": "Current user is not following this user"},
+            status=400)
 
     userToUnfollow.followers.remove(user)
     userToUnfollow.save()
@@ -115,6 +123,7 @@ def unfollow(request, username):
     user.save()
 
     return JsonResponse({"message": "Users updated successfully."}, status=201)
+
 
 # POST/GET All endpoint for posts
 def posts(request):
@@ -129,8 +138,10 @@ def posts(request):
 
         post.save()
 
-        return JsonResponse({"message": "Post created successfully."}, status=201)
-    
+        return JsonResponse({
+            "message": "Post created successfully."},
+            status=201)
+
     if request.method == "GET":
         onlyFollowing = request.GET.get('onlyFollowing')
         onlyUser = request.GET.get('username')
@@ -141,29 +152,32 @@ def posts(request):
         if onlyFollowing is not None and onlyFollowing == 'True':
             following = request.user.following.all()
             postList = Post.objects.filter(user__in=following)
-        
+
         if onlyUser is not None:
             requestedUser = User.objects.get(username=onlyUser)
             postList = Post.objects.filter(user=requestedUser)
 
         postList = postList.order_by("-timestamp").all()
 
-        
         paginator = Paginator(postList, 10)
         postsToReturn = paginator.get_page(page_number)
 
-        return JsonResponse({"data": [post.serialize() for post in postsToReturn],
-                             "num_pages": paginator.num_pages}, safe=False)
+        return JsonResponse({
+            "data": [post.serialize() for post in postsToReturn],
+            "num_pages": paginator.num_pages},
+            safe=False)
 
     else:
-        return JsonResponse({"error": "POST or GET request required."}, status=400) 
+        return JsonResponse({
+            "error": "POST or GET request required."},
+            status=400)
 
 
 # PUT endpoint for individual post
 def post(request, post_id):
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."}, status=400) 
-    
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
     try:
         post = Post.objects.get(user=request.user, pk=post_id)
     except Post.DoesNotExist:
@@ -180,17 +194,19 @@ def post(request, post_id):
 
 def likePost(request, post_id):
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."}, status=400) 
-    
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found."}, status=404)
 
     user = request.user
-    
+
     if user in post.likedBy.all():
-        return JsonResponse({"error": "User already liked this post"}, status=400) 
+        return JsonResponse({
+            "error": "User already liked this post"},
+            status=400)
 
     post.likes += 1
     post.likedBy.add(user)
@@ -201,22 +217,22 @@ def likePost(request, post_id):
 
 def unlikePost(request, post_id):
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."}, status=400) 
-    
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found."}, status=404)
 
     user = request.user
-    
+
     if user not in post.likedBy.all():
-        return JsonResponse({"error": "User already unliked this post"}, status=400) 
+        return JsonResponse({
+            "error": "User already unliked this post"},
+            status=400)
 
     post.likes -= 1
     post.likedBy.remove(user)
     post.save()
 
     return JsonResponse({"message": "Post updated successfully."}, status=201)
-
-# Load Profile Page

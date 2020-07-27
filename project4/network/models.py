@@ -4,19 +4,32 @@ from django.core.serializers import serialize
 
 
 class User(AbstractUser):
-    followers = models.ManyToManyField('self', symmetrical=False, related_name="userFollowers")
-    following = models.ManyToManyField('self', symmetrical=False, related_name="userFollowing")
+    followers = models.ManyToManyField('self',
+                                       symmetrical=False,
+                                       related_name="userFollowers")
+    following = models.ManyToManyField('self',
+                                       symmetrical=False,
+                                       related_name="userFollowing")
 
     def serialize(self):
         return {
             "numFollowing": self.following.count(),
             "numFollowers": self.followers.count(),
-            "following": serialize("json", self.following.all(), fields=["username"]),
-            "followers": serialize("json", self.followers.all(), fields=["username"])
+            "following": serialize("json",
+                                   self.following.all(),
+                                   fields=["username"]),
+            "followers": serialize("json",
+                                   self.followers.all(),
+                                   fields=["username"])
         }
 
+
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="poster")
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="poster")
     content = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     likes = models.IntegerField(default=0)
@@ -29,5 +42,8 @@ class Post(models.Model):
             "content": self.content,
             "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p"),
             "likes": self.likes,
-            "likedBy": serialize("json", self.likedBy.all(), fields=["username"])
+            "likedBy": serialize(
+                "json",
+                self.likedBy.all(),
+                fields=["username"])
         }
